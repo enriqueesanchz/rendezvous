@@ -1,0 +1,3 @@
+fastapi[all]
+pymongo[srv]
+python-dotenv
