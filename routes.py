@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from typing import List
 
-from models import Namespace, NamespaceUpdate, PeerUpdate
+from models import Namespace, NamespaceUpdate, Peer, PeerUpdate
 
 router = APIRouter()
 
@@ -71,7 +71,7 @@ def update_peer(name: str, username: str, request: Request, peer: PeerUpdate = B
         
         if ("ip" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
-                    {"name": name, "peers.username": username}, {"$set": {"peers.$.ip":  peer["ip"]}}
+                {"name": name, "peers.username": username}, {"$set": {"peers.$.ip":  peer["ip"]}}
             )
 
             if update_result.modified_count == 0:
@@ -93,3 +93,24 @@ def delete_namespace(name: str, request: Request, response: Response):
         return response
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} not found")
+
+@router.post("/{name}", response_description="Create a new peer", status_code=status.HTTP_201_CREATED, response_model=Namespace)
+def create_peer(name: str, request: Request, peer: Peer = Body(...)):
+    peer = jsonable_encoder(peer)
+    
+    existing_peer = request.app.database["namespaces"].find_one(
+        {"name": name, "peers.username": peer["username"]}
+    )
+    if(existing_peer == None):
+        update_result = request.app.database["namespaces"].update_one(
+            {"name": name}, {"$push": {"peers": peer}}
+        )
+        if update_result.modified_count == 0:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} was not found")
+
+        if (
+            existing_namespace := request.app.database["namespaces"].find_one({"name": name})
+        ) is not None:
+            return existing_namespace
+    
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Peer with name {peer['username']} already exists in {name}")
