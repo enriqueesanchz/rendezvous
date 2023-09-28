@@ -57,25 +57,22 @@ def update_peer(name: str, username: str, request: Request, peer: PeerUpdate = B
     peer = {k: v for k, v in peer.dict().items() if v is not None}
 
     existing_peer = request.app.database["namespaces"].find_one(
-        { "peers.username": username }, {"peers": { "$elemMatch": { "username": username } } }
+        {"peers": { "$elemMatch": { "username": username } } }
     )
+    
+    if(existing_peer == None):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} and user {username} not found")
 
-    if len(peer) >= 1:
+    if len(peer) >= 1 and existing_peer != None:
         if ("port" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
                 {"name": name, "peers.username": username}, {"$set": {"peers.$.port":  peer["port"]}}
             )
-
-            if update_result.modified_count == 0:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} and user {username} not found")
         
         if ("ip" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
                 {"name": name, "peers.username": username}, {"$set": {"peers.$.ip":  peer["ip"]}}
             )
-
-            if update_result.modified_count == 0:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} and user {username} not found")
 
     if (
         existing_namespace := request.app.database["namespaces"].find_one({"name": name, "peers.username": username})
