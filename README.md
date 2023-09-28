@@ -5,6 +5,7 @@ This REST API is used by p2p app's peers to meet each other.
 ```
 pip install -r requirements.txt
 ```
+- Python >= 3.8
 - fastapi[all]
 - pymongo[srv]
 - python-dotenv
