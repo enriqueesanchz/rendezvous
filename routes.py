@@ -42,9 +42,6 @@ def update_namespace(name: str, request: Request, namespace: NamespaceUpdate = B
             {"name": name}, {"$set": namespace}
         )
 
-        if update_result.modified_count == 0:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} not found")
-
     if (
         existing_namespace := request.app.database["namespaces"].find_one({"name": name})
     ) is not None:
@@ -72,6 +69,11 @@ def update_peer(name: str, username: str, request: Request, peer: PeerUpdate = B
         if ("ip" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
                 {"name": name, "peers.username": username}, {"$set": {"peers.$.ip":  peer["ip"]}}
+            )
+
+        if ("natType" in peer.keys()):
+            update_result = request.app.database["namespaces"].update_one(
+                {"name": name, "peers.username": username}, {"$set": {"peers.$.natType":  peer["ip"]}}
             )
 
     if (

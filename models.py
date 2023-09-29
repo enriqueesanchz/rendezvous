@@ -1,10 +1,16 @@
+from enum import Enum
 from typing import List, Optional
 from pydantic import BaseModel, Field
+
+class NatType(int, Enum):
+    EndpointIndependent = 1
+    EndpointDependent = 2
 
 class Peer(BaseModel):
     username: str = Field(...)
     ip: str = Field(...)
-    port: List[int] = Field(...)
+    ports: List[int] = Field(...)
+    natType: NatType
 
     class Config:
         populate_by_name = True
@@ -12,25 +18,28 @@ class Peer(BaseModel):
             "example": {
                 "username": "enrique",
                 "ip": "111.111.111.111",
-                "port": [
+                "ports": [
                     5555,
                     6666,
                     7777
-                ]
+                ],
+                "natType": 1
             }
         }
 
 class PeerUpdate(BaseModel):
     ip: Optional[str] = Field(...)
-    port: Optional[List[int]] = Field(...)
+    ports: Optional[List[int]] = Field(...)
+    natType: Optional[NatType] = Field(...)
 
     class Config:
         json_schema_extra = {
             "example": {
                 "ip": "111.111.111.222",
-                "port": [
+                "ports": [
                     9999
-                ]
+                ],
+                "natType": 2
             }
         }
 
@@ -46,19 +55,21 @@ class Namespace(BaseModel):
                 "peers": [
                     {   "username": "enrique", 
                         "ip": "111.111.111.111",
-                        "port": [
+                        "ports": [
                             5555,
                             6666,
                             7777
-                        ]
+                        ],
+                        "natType": 1
                     },
                     {
                         "username": "guille", 
                         "ip": "222.222.222.222",
-                        "port": [
+                        "ports": [
                             8888,
                             9999
-                        ]
+                        ],
+                        "natType": 2
                     }
                 ]
             }
@@ -73,9 +84,10 @@ class NamespaceUpdate(BaseModel):
                 "peers": [
                     {   "username": "enrique", 
                         "ip": "111.111.111.111",
-                        "port": [
+                        "ports": [
                             5555
-                        ]
+                        ],
+                        "natType": 1
                     }
                 ]
             }
