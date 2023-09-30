@@ -10,7 +10,7 @@ class Peer(BaseModel):
     username: str = Field(...)
     ip: str = Field(...)
     ports: List[int] = Field(...)
-    natType: NatType
+    natType: NatType = Field(...)
 
     class Config:
         populate_by_name = True
@@ -76,7 +76,7 @@ class Namespace(BaseModel):
         }
 
 class NamespaceUpdate(BaseModel):
-    peers: List[Peer]
+    peers: List[Peer] = Field(...)
 
     class Config:
         json_schema_extra = {

@@ -9,6 +9,7 @@ pip install -r requirements.txt
 - fastapi[all]
 - pymongo[srv]
 - python-dotenv
+- Mongodb database
 
 ## How to run the server
 ```
@@ -18,6 +19,8 @@ REST API docs will be in http://127.0.0.1:8000/docs
 
 ## Methods
 ![REST API methods](https://github.com/enriqueesanchz/rendezvous/blob/main/methods.png?raw=true)
+
+Mongodb will remove namespaces not modified in 10 minutes
 
 ## Disclaimer
 This is a sample app for educational purposes, you can read my blog post: https://enriqueesanchz.github.io

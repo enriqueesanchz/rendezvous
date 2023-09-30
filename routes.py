@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from typing import List
@@ -9,6 +10,7 @@ router = APIRouter()
 @router.post("/", response_description="Create a new namespace", status_code=status.HTTP_201_CREATED, response_model=Namespace)
 def create_namespace(request: Request, namespace: Namespace = Body(...)):
     namespace = jsonable_encoder(namespace)
+    namespace["lastModifiedDate"] = datetime.utcnow()
     
     existing_namespace = request.app.database["namespaces"].find_one(
         {"name": namespace["name"]}
@@ -37,6 +39,8 @@ def find_namespace(name: str, request: Request):
 @router.put("/{name}", response_description="Update a namespace", response_model=Namespace)
 def update_namespace(name: str, request: Request, namespace: NamespaceUpdate = Body(...)):
     namespace = {k: v for k, v in namespace.dict().items() if v is not None}
+    namespace["lastModifiedDate"] = datetime.utcnow()
+    
     if len(namespace) >= 1:
         update_result = request.app.database["namespaces"].update_one(
             {"name": name}, {"$set": namespace}
@@ -73,8 +77,15 @@ def update_peer(name: str, username: str, request: Request, peer: PeerUpdate = B
 
         if ("natType" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
-                {"name": name, "peers.username": username}, {"$set": {"peers.$.natType":  peer["ip"]}}
+                {"name": name, "peers.username": username}, {"$set": {"peers.$.natType":  peer["natType"]}}
             )
+
+        update_result = request.app.database["namespaces"].update_one(
+            {"name": name}, {"$set": {"lastModifiedDate": datetime.utcnow()}}
+        )
+
+        if update_result.modified_count == 0:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} was not found")
 
     if (
         existing_namespace := request.app.database["namespaces"].find_one({"name": name, "peers.username": username})
@@ -104,6 +115,13 @@ def create_peer(name: str, request: Request, peer: Peer = Body(...)):
         update_result = request.app.database["namespaces"].update_one(
             {"name": name}, {"$push": {"peers": peer}}
         )
+        if update_result.modified_count == 0:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} was not found")
+        
+        update_result = request.app.database["namespaces"].update_one(
+            {"name": name}, {"$set": {"lastModifiedDate": datetime.utcnow()}}
+        )
+
         if update_result.modified_count == 0:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} was not found")
 
