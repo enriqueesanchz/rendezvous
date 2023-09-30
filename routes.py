@@ -65,10 +65,11 @@ def update_peer(name: str, username: str, request: Request, peer: PeerUpdate = B
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Namespace with name {name} and user {username} not found")
 
     if len(peer) >= 1 and existing_peer != None:
-        if ("port" in peer.keys()):
+        if ("ports" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(
-                {"name": name, "peers.username": username}, {"$set": {"peers.$.port":  peer["port"]}}
+                {"name": name, "peers.username": username}, {"$set": {"peers.$.ports":  peer["ports"]}}
             )
+            print(update_result)
         
         if ("ip" in peer.keys()):
             update_result = request.app.database["namespaces"].update_one(

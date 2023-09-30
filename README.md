@@ -22,6 +22,11 @@ REST API docs will be in http://127.0.0.1:8000/docs
 
 Mongodb will remove namespaces not modified in 10 minutes
 
+## TODO:
+- [ ] Unit tests
+- [ ] Improve security
+- [ ] Datetime
+
 ## Disclaimer
 This is a sample app for educational purposes, you can read my blog post: https://enriqueesanchz.github.io
 
