@@ -26,8 +26,10 @@ Mongodb will remove namespaces not modified in 10 minutes
 - [ ] Unit tests
 - [ ] Improve security
 - [ ] Datetime
+- [ ] Refactor mongodb db
+- [ ] Refactor routes.py methods
 
 ## Disclaimer
-This is a sample app for educational purposes, you can read my blog post: https://enriqueesanchz.github.io
+This is a sample app for educational purposes, you can read my blog post: https://enriqueesanchz.github.io/posts/Nat-traversal/
 
 This app is not for real use, it doesn't check some security issues.
